@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>badu_111avto — Унаалар жана Админ Панель</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --card: #0f172a;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #f97316;
+      --accent-hover: #ea580c;
+      --green: #22c55e;
+      --red: #ef4444;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      background: #0b1120;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .brand {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .brand span { color: var(--text); }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .btn {
+      border: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-add { background: var(--accent); color: #fff; }
+    .btn-add:hover { background: var(--accent-hover); }
+    .btn-admin { background: #334155; color: #f8fafc; border: 1px solid #475569; }
+    .btn-admin:hover { background: #475569; }
+    .btn-wa-top { background: var(--green); color: #052e16; font-weight: 800; }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px 60px;
+    }
+    .bar {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    @media (max-width: 600px) {
+      .bar { grid-template-columns: 1fr; }
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(295px, 1fr));
+      gap: 16px;
+    }
+    .car-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .photo-box {
+      position: relative;
+      height: 195px;
+      background: #020617;
+    }
+    .photo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      cursor: zoom-in;
+      display: block;
+    }
+    .photo-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 999px;
+    }
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(15, 23, 42, 0.78);
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .arrow.prev { left: 8px; }
+    .arrow.next { right: 8px; }
+
+    .thumbs {
+      display: flex;
+      gap: 5px;
+      padding: 8px 12px 0;
+      overflow-x: auto;
+    }
+    .thumb {
+      width: 38px;
+      height: 28px;
+      object-fit: cover;
+      border-radius: 5px;
+      border: 2px solid transparent;
+      opacity: 0.65;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .thumb.active {
+      border-color: var(--accent);
+      opacity: 1;
+    }
+
+    .car-info {
+      padding: 14px 16px 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .car-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .car-name {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 800;
+    }
+    .car-price {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fb923c;
+      white-space: nowrap;
+    }
+    .car-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .car-desc {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.4;
+      margin: 0 0 12px;
+    }
+    .btn-zoom {
+      width: 100%;
+      background: var(--card);
+      color: #e2e8f0;
+      border: 1px solid var(--border);
+      padding: 7px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .btn-zoom:hover { border-color: var(--accent); }
+    .btn-wa {
+      display: block;
+      width: 100%;
+      background: var(--green);
+      color: #052e16;
+      text-decoration: none;
+      text-align: center;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .pay-box {
+      background: var(--card);
+      border: 1px solid #475569;
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .pay-num {
+      font-size: 17px;
+      font-weight: 800;
+      color: #4ade80;
+      letter-spacing: 0.5px;
+    }
+
+    .admin-section {
+      display: none;
+      background: #111827;
+      border: 2px solid var(--accent);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .admin-section.open { display: block; }
+    .admin-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .admin-settings {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+      background: var(--surface);
+      padding: 14px;
+      border-radius: 12px;
+    }
+    .admin-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .admin-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 820px) {
+      .admin-row { grid-template-columns: 1fr; }
+    }
+    .status-pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      margin-left: 6px;
+    }
+    .st-published { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+    .st-pending { background: rgba(250, 204, 21, 0.2); color: #facc15; }
+    .st-unpaid { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+    .admin-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 10px;
+    }
+    .btn-sm {
+      border: none;
+      border-radius: 8px;
+      padding: 7px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-approve { background: var(--green); color: #052e16; }
+    .btn-hide { background: #475569; color: #fff; }
+    .btn-edit { background: #0284c7; color: #fff; }
+    .btn-del { background: var(--red); color: #fff; }
+
+    .admin-photos-mini {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .mini-photo-wrap {
+      position: relative;
+      width: 64px;
+      height: 46px;
+    }
+    .mini-photo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .mini-del {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: none;
+      background: var(--red);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.85);
+      z-index: 60;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal.open { display: flex; }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-box.wide { max-width: 760px; }
+    .modal-box h3 { margin: 0 0 12px; font-size: 18px; }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin: 10px 0 5px;
+    }
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .btn-save {
+      width: 100%;
+      margin-top: 14px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 11px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-close {
+      width: 100%;
+      margin-top: 8px;
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 9px;
+      border-radius: 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .lb-img {
+      width: 100%;
+      max-height: 430px;
+      object-fit: contain;
+      background: #020617;
+      border-radius: 10px;
+    }
+    .lb-thumbs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .lb-thumbs img {
+      width: 68px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 2px solid transparent;
+      opacity: 0.65;
+      cursor: pointer;
+    }
+    .lb-thumbs img.active {
+      border-color: var(--accent);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand">badu<span>_111avto</span></div>
+      <div class="header-actions">
+        <button class="btn btn-add" type="button" onclick="openSubmitListingModal()">+ Жарыя берүү (Төлөм менен)</button>
+        <button class="btn btn-admin" type="button" id="adminToggleBtn" onclick="toggleAdminPanel()">Админ панель</button>
+        <a class="btn btn-wa-top" id="topWa" href="#" target="_blank">WhatsApp</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- АДМИН ПАНЕЛЬ -->
+    <section class="admin-section" id="adminSection">
+      <div class="admin-top">
+        <div>
+          <h2 style="margin:0; font-size:20px;">Админ Панель — badu_111avto</h2>
+          <div style="font-size:12px; color:var(--muted); margin-top:3px;">
+            Төлөмдү ырастагандан кийин гана жарыя башкы бетте көрүнөт. Баардык маалыматты өзгөртүүгө болот.
+          </div>
+        </div>
+        <button class="btn btn-hide" type="button" onclick="logoutAdmin()">Админден чыгуу</button>
+      </div>
+
+      <div class="admin-settings">
+        <div>
+          <label>Төлөм / Карта номери</label>
+          <input id="adminPayNumber" type="text" oninput="updateSettings()" />
+        </div>
+        <div>
+          <label>Жарыя акысы / баасы (сом)</label>
+          <input id="adminAdFee" type="number" min="0" oninput="updateSettings()" />
+        </div>
+        <div>
+          <label>Салон WhatsApp номери</label>
+          <input id="adminWaNumber" type="text" oninput="updateSettings()" />
+        </div>
+        <div>
+          <label>Жаңы админ сыр сөз (пароль)</label>
+          <input id="adminNewPass" type="text" placeholder="Өзгөртүү үчүн жаңы пароль жазыңыз" onchange="changeAdminPass()" />
+        </div>
+      </div>
+
+      <div class="admin-list" id="adminCarsList"></div>
+    </section>
+
+    <!-- КАРДАРЛАР КӨРГӨН КАТАЛОГ -->
+    <div class="bar">
+      <input id="searchInput" type="text" placeholder="Унаа издөө (марка, модель, жыл)..." oninput="renderPublic()" />
+      <select id="sortSelect" onchange="renderPublic()">
+        <option value="default">Ирет: Баштапкы</option>
+        <option value="price-asc">Баасы: Арзан → Кымбат</option>
+        <option value="price-desc">Баасы: Кымбат → Арзан</option>
+        <option value="year-desc">Жылы: Жаңылары</option>
+      </select>
+    </div>
+
+    <div class="grid" id="carsGrid"></div>
+  </main>
+
+  <!-- Жаңы жарыя берүү + Төлөм нускамасы -->
+  <div class="modal" id="submitListingModal">
+    <div class="modal-box">
+      <h3>Жаңы унаа жарыясын берүү (макс. 7 сүрөт)</h3>
+      <label>Марка жана модель</label>
+      <input id="carTitle" type="text" placeholder="Мисалы: Toyota Camry 70" />
+
+      <div class="row-2">
+        <div>
+          <label>Жылы</label>
+          <input id="carYear" type="number" value="2020" />
+        </div>
+        <div>
+          <label>Баасы ($)</label>
+          <input id="carPrice" type="number" value="18500" />
+        </div>
+      </div>
+
+      <label>Кыскача маалымат</label>
+      <input id="carSpecs" type="text" placeholder="2.5L • Автомат • Бензин" />
+
+      <label>Сүрөт шилтемелери (ар сапка 1 шилтеме, макс. 7)</label>
+      <textarea id="carUrls" rows="2" placeholder="https://.../1.jpg&#10;https://.../2.jpg"></textarea>
+
+      <label>Же файлдан сүрөт тандаңыз (макс. 7)</label>
+      <input id="carFiles" type="file" accept="image/*" multiple />
+
+      <label>Сүрөттөмө</label>
+      <textarea id="carDesc" rows="2" placeholder="Унаа тууралуу маалымат"></textarea>
+
+      <div class="pay-box">
+        <div>Жарыя баасы / акысы: <strong id="modalFeeText">500 сом</strong></div>
+        <div>Төлөм / карта номери: <span class="pay-num" id="modalPayNumText">0509467779</span></div>
+        <div style="font-size:12px; color:var(--muted); margin-top:4px;">
+          Төлөмдү жогорудагы номерге которуп, төмөнкү белгини коюңуз. Админ төлөмдү ырастагандан кийин жарыя башкы бетке чыгат.
+        </div>
+        <label style="margin-top:8px;">
+          <input id="markPaidCheckbox" type="checkbox" style="width:auto; margin-right:6px;" />
+          Төлөмдү <span id="checkboxPayNumText">0509467779</span> номерине котордум (текшерүүгө жиберүү)
+        </label>
+      </div>
+
+      <button class="btn-save" type="button" onclick="createListing()">Жарыяны сактоо</button>
+      <button class="btn-close" type="button" onclick="closeModal('submitListingModal')">Жабуу</button>
+    </div>
+  </div>
+
+  <!-- Админ логин модалы -->
+  <div class="modal" id="adminLoginModal">
+    <div class="modal-box">
+      <h3>Админ панелге кирүү</h3>
+      <label>Админ сыр сөз (пароль)</label>
+      <input id="adminPassInput" type="password" placeholder="Сыр сөздү жазыңыз" />
+      <button class="btn-save" type="button" onclick="verifyAdminPass()">Кирүү</button>
+      <button class="btn-close" type="button" onclick="closeModal('adminLoginModal')">Жабуу</button>
+    </div>
+  </div>
+
+  <!-- Админ унааны толук түзөтүү модалы -->
+  <div class="modal" id="editCarModal">
+    <div class="modal-box">
+      <h3>Унааны өзгөртүү (Админ)</h3>
+      <label>Марка жана модель</label>
+      <input id="editTitle" type="text" />
+
+      <div class="row-2">
+        <div>
+          <label>Жылы</label>
+          <input id="editYear" type="number" />
+        </div>
+        <div>
+          <label>Баасы ($)</label>
+          <input id="editPrice" type="number" />
+        </div>
+      </div>
+
+      <label>Кыскача маалымат</label>
+      <input id="editSpecs" type="text" />
+
+      <label>Статус</label>
+      <select id="editStatus">
+        <option value="published">Жарыяланган (Кардарларга көрүнөт)</option>
+        <option value="pending_check">Төлөм текшерүүдө (Жашыруун)</option>
+        <option value="unpaid">Төлөм күтүүдө (Жашыруун)</option>
+      </select>
+
+      <label>Сүрөттөмө</label>
+      <textarea id="editDesc" rows="2"></textarea>
+
+      <label>Кошумча сүрөт кошуу (URL, макс. 7 жалпы)</label>
+      <input id="editAddPhotoUrl" type="text" placeholder="https://..." />
+
+      <label>Же файлдан сүрөт кошуу (макс. 7 жалпы)</label>
+      <input id="editAddPhotoFiles" type="file" accept="image/*" multiple />
+
+      <button class="btn-save" type="button" onclick="saveEditedCar()">Өзгөртүүлөрдү сактоо</button>
+      <button class="btn-close" type="button" onclick="closeModal('editCarModal')">Жабуу</button>
+    </div>
+  </div>
+
+  <!-- Галерея -->
+  <div class="modal" id="galleryModal">
+    <div class="modal-box wide">
+      <h3 id="galleryTitle">Сүрөттөр</h3>
+      <img id="galleryMain" class="lb-img" src="" alt="" />
+      <div class="lb-thumbs" id="galleryThumbs"></div>
+      <button class="btn-close" type="button" onclick="closeModal('galleryModal')">Жабуу</button>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_WA_PHONE = "996223001500";
+    const DEFAULT_ADMIN_PASS = "111avto";
+    const MAX_PHOTOS = 7;
+
+    const CARS_KEY = "badu_111avto_admin_cars_v1";
+    const SETTINGS_KEY = "badu_111avto_admin_settings_v1";
+    const PASS_KEY = "badu_111avto_admin_pass_v1";
+
+    const DEFAULT_SETTINGS = {
+      payNumber: "0509467779",
+      adFee: 500,
+      waPhone: "0223001500"
+    };
+
+    const DEFAULT_CARS = [
+      {
+        id: "1",
+        title: "Toyota Camry 70",
+        year: 2019,
+        price: 21500,
+        specs: "2.5L • Автомат • Бензин",
+        desc: "Абалы жакшы, документтери таза.",
+        status: "published",
+        photos: [
+          "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=900&q=75",
+          "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=900&q=75"
+        ]
+      },
+      {
+        id: "2",
+        title: "Toyota Prius 30",
+        year: 2014,
+        price: 10800,
+        specs: "1.8L Гибрид • Автомат",
+        desc: "Үнөмдүү, жүрүш бөлүгү жакшы.",
+        status: "pending_check",
+        photos: [
+          "https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&w=900&q=75"
+        ]
+      }
+    ];
+
+    let cars = [];
+    let settings = { ...DEFAULT_SETTINGS };
+    let adminPass = DEFAULT_ADMIN_PASS;
+    let isAdminLoggedIn = false;
+    let photoIdx = {};
+    let editingId = null;
+
+    function normalizeWaPhone(raw) {
+      const digits = String(raw || "").replace(/\D/g, "");
+      if (!digits) return DEFAULT_WA_PHONE;
+      if (digits.startsWith("0") && digits.length === 10) {
+        return "996" + digits.slice(1);
+      }
+      return digits;
+    }
+
+    function loadAdminPass() {
+      try {
+        const p = localStorage.getItem(PASS_KEY);
+        if (p && p.trim()) return p.trim();
+      } catch {}
+      return DEFAULT_ADMIN_PASS;
+    }
+
+    function changeAdminPass() {
+      const el = document.getElementById("adminNewPass");
+      const next = el.value.trim();
+      if (!next) return;
+      adminPass = next;
+      localStorage.setItem(PASS_KEY, adminPass);
+      el.value = "";
+      alert("Админ сыр сөзү жаңыртылды!");
+    }
+
+    function loadSettings() {
+      try {
+        const s = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+        if (s && typeof s === "object") {
+          return {
+            payNumber: s.payNumber || DEFAULT_SETTINGS.payNumber,
+            adFee: Number(s.adFee ?? DEFAULT_SETTINGS.adFee),
+            waPhone: s.waPhone || DEFAULT_SETTINGS.waPhone
+          };
+        }
+      } catch {}
+      return { ...DEFAULT_SETTINGS };
+    }
+
+    function syncTopWaLink() {
+      const normalized = normalizeWaPhone(settings.waPhone);
+      const msg = encodeURIComponent("Саламатсызбы! badu_111avto боюнча жазып жатам.");
+      document.getElementById("topWa").href = `https://wa.me/${normalized}?text=${msg}`;
+    }
+
+    function syncSettingsUI() {
+      document.getElementById("adminPayNumber").value = settings.payNumber;
+      document.getElementById("adminAdFee").value = settings.adFee;
+      document.getElementById("adminWaNumber").value = settings.waPhone;
+      document.getElementById("modalPayNumText").textContent = settings.payNumber;
+      document.getElementById("checkboxPayNumText").textContent = settings.payNumber;
+      document.getElementById("modalFeeText").textContent = `${settings.adFee} сом`;
+      syncTopWaLink();
+    }
+
+    function updateSettings() {
+      settings.payNumber = document.getElementById("adminPayNumber").value.trim() || DEFAULT_SETTINGS.payNumber;
+      settings.adFee = Math.max(0, Number(document.getElementById("adminAdFee").value) || 0);
+      settings.waPhone = document.getElementById("adminWaNumber").value.trim() || DEFAULT_SETTINGS.waPhone;
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+      document.getElementById("modalPayNumText").textContent = settings.payNumber;
+      document.getElementById("checkboxPayNumText").textContent = settings.payNumber;
+      document.getElementById("modalFeeText").textContent = `${settings.adFee} сом`;
+      syncTopWaLink();
+      renderPublic();
+    }
+
+    function loadCars() {
+      try {
+        const d = JSON.parse(localStorage.getItem(CARS_KEY));
+        if (Array.isArray(d)) return d;
+      } catch {}
+      return JSON.parse(JSON.stringify(DEFAULT_CARS));
+    }
+
+    function persistCars() {
+      localStorage.setItem(CARS_KEY, JSON.stringify(cars));
+      renderPublic();
+      if (isAdminLoggedIn) renderAdminList();
+    }
+
+    function placeholderImg() {
+      return "data:image/svg+xml;utf8," + encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="360"><rect width="600" height="360" fill="#0f172a"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#64748b" font-family="Arial" font-size="18">Сүрөт жок (макс. 7)</text></svg>`
+      );
+    }
+
+    function readFiles(fileList) {
+      const files = Array.from(fileList || []);
+      return Promise.all(
+        files.map((f) => new Promise((res) => {
+          const r = new FileReader();
+          r.onload = () => res(String(r.result || ""));
+          r.onerror = () => res("");
+          r.readAsDataURL(f);
+        }))
+      );
+    }
+
+    function openSubmitListingModal() {
+      syncSettingsUI();
+      document.getElementById("carTitle").value = "";
+      document.getElementById("carSpecs").value = "";
+      document.getElementById("carUrls").value = "";
+      document.getElementById("carFiles").value = "";
+      document.getElementById("carDesc").value = "";
+      document.getElementById("markPaidCheckbox").checked = false;
+      document.getElementById("submitListingModal").classList.add("open");
+    }
+
+    async function createListing() {
+      const title = document.getElementById("carTitle").value.trim();
+      const year = Number(document.getElementById("carYear").value) || 2020;
+      const price = Number(document.getElementById("carPrice").value) || 0;
+      const specs = document.getElementById("carSpecs").value.trim();
+      const desc = document.getElementById("carDesc").value.trim();
+      const paidChecked = document.getElementById("markPaidCheckbox").checked;
+
+      if (!title) {
+        alert("Унаанын атын жазыңыз!");
+        return;
+      }
+
+      const urls = document.getElementById("carUrls").value.split("\n").map((s) => s.trim()).filter(Boolean);
+      const files = (await readFiles(document.getElementById("carFiles").files)).filter(Boolean);
+      const all = [...urls, ...files];
+      if (all.length > MAX_PHOTOS) {
+        alert(`Максимум ${MAX_PHOTOS} сүрөт кошууга болот. Алгачкы ${MAX_PHOTOS} сүрөт сакталды.`);
+      }
+
+      const initialStatus = paidChecked ? "pending_check" : "unpaid";
+
+      const newCar = {
+        id: String(Date.now()),
+        title,
+        year,
+        price,
+        specs,
+        desc,
+        status: initialStatus,
+        photos: all.slice(0, MAX_PHOTOS)
+      };
+
+      cars.unshift(newCar);
+      photoIdx[newCar.id] = 0;
+      persistCars();
+      closeModal("submitListingModal");
+
+      if (paidChecked) {
+        alert(`Жарыя сакталды! Төлөм (${settings.payNumber}) админ тарабынан ырасталгандан кийин башкы бетке жарыяланат.`);
+      } else {
+        alert(`Жарыя "Төлөм күтүүдө" абалында сакталды. Төлөмдү ${settings.payNumber} номерине которуп, админ ырастагандан кийин жарыяланат.`);
+      }
+    }
+
+    function toggleAdminPanel() {
+      if (isAdminLoggedIn) {
+        const sec = document.getElementById("adminSection");
+        sec.classList.toggle("open");
+        if (sec.classList.contains("open")) renderAdminList();
+        return;
+      }
+      document.getElementById("adminPassInput").value = "";
+      document.getElementById("adminLoginModal").classList.add("open");
+    }
+
+    function verifyAdminPass() {
+      const val = document.getElementById("adminPassInput").value;
+      if (val !== adminPass) {
+        alert("Сыр сөз туура эмес!");
+        return;
+      }
+      isAdminLoggedIn = true;
+      closeModal("adminLoginModal");
+      document.getElementById("adminToggleBtn").textContent = "Админ панель ✓";
+      const sec = document.getElementById("adminSection");
+      sec.classList.add("open");
+      syncSettingsUI();
+      renderAdminList();
+    }
+
+    function logoutAdmin() {
+      isAdminLoggedIn = false;
+      document.getElementById("adminToggleBtn").textContent = "Админ панель";
+      document.getElementById("adminSection").classList.remove("open");
+    }
+
+    function setCarStatus(id, newStatus) {
+      const car = cars.find((c) => c.id === id);
+      if (!car) return;
+      car.status = newStatus;
+      persistCars();
+    }
+
+    function deleteCar(id) {
+      if (!confirm("Бул жарыяны биротоло өчүрөйүнбү?")) return;
+      cars = cars.filter((c) => c.id !== id);
+      persistCars();
+    }
+
+    function deleteSinglePhoto(carId, pIndex) {
+      const car = cars.find((c) => c.id === carId);
+      if (!car || !Array.isArray(car.photos)) return;
+      car.photos.splice(pIndex, 1);
+      if ((photoIdx[carId] || 0) >= car.photos.length) {
+        photoIdx[carId] = Math.max(0, car.photos.length - 1);
+      }
+      persistCars();
+    }
+
+    function openEditCarModal(id) {
+      const car = cars.find((c) => c.id === id);
+      if (!car) return;
+      editingId = id;
+      document.getElementById("editTitle").value = car.title;
+      document.getElementById("editYear").value = car.year;
+      document.getElementById("editPrice").value = car.price;
+      document.getElementById("editSpecs").value = car.specs || "";
+      document.getElementById("editStatus").value = car.status || "unpaid";
+      document.getElementById("editDesc").value = car.desc || "";
+      document.getElementById("editAddPhotoUrl").value = "";
+      document.getElementById("editAddPhotoFiles").value = "";
+      document.getElementById("editCarModal").classList.add("open");
+    }
+
+    async function saveEditedCar() {
+      const car = cars.find((c) => c.id === editingId);
+      if (!car) return;
+      car.photos = car.photos || [];
+
+      const title = document.getElementById("editTitle").value.trim();
+      if (!title) {
+        alert("Унаанын аты бош болбошу керек!");
+        return;
+      }
+
+      car.title = title;
+      car.year = Number(document.getElementById("editYear").value) || car.year;
+      car.price = Number(document.getElementById("editPrice").value) || 0;
+      car.specs = document.getElementById("editSpecs").value.trim();
+      car.status = document.getElementById("editStatus").value;
+      car.desc = document.getElementById("editDesc").value.trim();
+
+      const extraUrl = document.getElementById("editAddPhotoUrl").value.trim();
+      const extraFiles = (await readFiles(document.getElementById("editAddPhotoFiles").files)).filter(Boolean);
+      const extraAll = [...(extraUrl ? [extraUrl] : []), ...extraFiles];
+
+      if (extraAll.length > 0) {
+        const left = MAX_PHOTOS - car.photos.length;
+        if (left <= 0) {
+          alert(`Бул унаада уже ${MAX_PHOTOS} сүрөт бар. Жаңы сүрөт кошулбайт.`);
+        } else {
+          if (extraAll.length > left) {
+            alert(`Дагы ${left} гана сүрөт кошууга болот.`);
+          }
+          car.photos.push(...extraAll.slice(0, left));
+        }
+      }
+
+      persistCars();
+      closeModal("editCarModal");
+    }
+
+    function statusBadgeHtml(status) {
+      if (status === "published") {
+        return `<span class="status-pill st-published">Жарыяланган (Төлөм ырасталган)</span>`;
+      }
+      if (status === "pending_check") {
+        return `<span class="status-pill st-pending">Төлөм текшерүүдө</span>`;
+      }
+      return `<span class="status-pill st-unpaid">Төлөм күтүүдө</span>`;
+    }
+
+    function renderAdminList() {
+      const box = document.getElementById("adminCarsList");
+      if (!cars.length) {
+        box.innerHTML = `<div style="color:var(--muted);">Азырынча жарыялар жок.</div>`;
+        return;
+      }
+
+      box.innerHTML = cars
+        .map((c) => {
+          const photos = c.photos || [];
+          const thumbs = photos
+            .map(
+              (src, idx) => `
+              <div class="mini-photo-wrap">
+                <img src="${src}" alt="" />
+                <button type="button" class="mini-del" title="Сүрөттү өчүрүү" onclick="deleteSinglePhoto('${c.id}', ${idx})">×</button>
+              </div>
+            `
+            )
+            .join("");
+
+          return `
+            <div class="admin-row">
+              <div>
+                <div style="font-size:16px; font-weight:800;">
+                  ${c.title} (${c.year}-ж.) • <span style="color:#fb923c;">$${c.price.toLocaleString()}</span>
+                  ${statusBadgeHtml(c.status)}
+                </div>
+                <div style="font-size:12px; color:var(--muted); margin-top:4px;">
+                  ${c.specs || "Мүнөздөмө жок"} • Сүрөт: ${photos.length}/${MAX_PHOTOS}
+                </div>
+                <div style="font-size:13px; color:#cbd5e1; margin-top:6px;">${c.desc || ""}</div>
+                <div class="admin-btns">
+                  <button type="button" class="btn-sm btn-approve" onclick="setCarStatus('${c.id}', 'published')">✓ Төлөмдү ырастоо (Жарыялоо)</button>
+                  <button type="button" class="btn-sm btn-hide" onclick="setCarStatus('${c.id}', 'unpaid')">Жашыруу</button>
+                  <button type="button" class="btn-sm btn-edit" onclick="openEditCarModal('${c.id}')">Өзгөртүү</button>
+                  <button type="button" class="btn-sm btn-del" onclick="deleteCar('${c.id}')">Өчүрүү</button>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:12px; color:var(--muted);">Сүрөттөр (${photos.length}/${MAX_PHOTOS}):</div>
+                <div class="admin-photos-mini">${thumbs || '<span style="font-size:12px; color:var(--muted);">Сүрөт жок</span>'}</div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function stepPhoto(id, d) {
+      const car = cars.find((c) => c.id === id);
+      if (!car || !car.photos || !car.photos.length) return;
+      const cur = photoIdx[id] || 0;
+      photoIdx[id] = (cur + d + car.photos.length) % car.photos.length;
+      renderPublic();
+    }
+
+    function pickPhoto(id, i) {
+      photoIdx[id] = i;
+      renderPublic();
+    }
+
+    function openGallery(id) {
+      const car = cars.find((c) => c.id === id);
+      if (!car) return;
+      const photos = car.photos && car.photos.length ? car.photos : [placeholderImg()];
+      let cur = photoIdx[id] || 0;
+      if (cur >= photos.length) cur = 0;
+
+      document.getElementById("galleryTitle").textContent = `${car.title} (${photos.length} / ${MAX_PHOTOS} сүрөт)`;
+      const main = document.getElementById("galleryMain");
+      const thumbs = document.getElementById("galleryThumbs");
+
+      function renderAt(i) {
+        cur = i;
+        main.src = photos[cur];
+        thumbs.innerHTML = photos
+          .map((src, idx) => `<img src="${src}" class="${idx === cur ? "active" : ""}" onclick="(${renderAt.toString()})(${idx})" alt="" />`)
+          .join("");
+      }
+
+      renderAt(cur);
+      document.getElementById("galleryModal").classList.add("open");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("open");
+    }
+
+    function renderPublic() {
+      const q = document.getElementById("searchInput").value.trim().toLowerCase();
+      const sort = document.getElementById("sortSelect").value;
+      const normalizedWa = normalizeWaPhone(settings.waPhone);
+
+      let list = cars.filter((c) => {
+        if (c.status !== "published") return false;
+        if (!q) return true;
+        return (
+          c.title.toLowerCase().includes(q) ||
+          String(c.year).includes(q) ||
+          (c.specs || "").toLowerCase().includes(q) ||
+          (c.desc || "").toLowerCase().includes(q)
+        );
+      });
+
+      if (sort === "price-asc") list.sort((a, b) => a.price - b.price);
+      if (sort === "price-desc") list.sort((a, b) => b.price - a.price);
+      if (sort === "year-desc") list.sort((a, b) => b.year - a.year);
+
+      const grid = document.getElementById("carsGrid");
+      if (!list.length) {
+        grid.innerHTML = `<div style="color:var(--muted);">Азырынча жарыяланган унаалар жок.</div>`;
+        return;
+      }
+
+      grid.innerHTML = list
+        .map((c) => {
+          const photos = c.photos && c.photos.length ? c.photos : [placeholderImg()];
+          const count = (c.photos && c.photos.length) || 0;
+          let idx = photoIdx[c.id] || 0;
+          if (idx >= photos.length) idx = 0;
+
+          const waText = encodeURIComponent(
+            `Саламатсызбы! badu_111avto сайтынан көрдүм: ${c.title} (${c.year}-ж., $${c.price.toLocaleString()}).`
+          );
+
+          const thumbsHtml =
+            count > 1
+              ? `<div class="thumbs">${photos
+                  .map((src, i) => `<img src="${src}" class="thumb ${i === idx ? "active" : ""}" onclick="pickPhoto('${c.id}', ${i})" alt="" />`)
+                  .join("")}</div>`
+              : "";
+
+          const arrowsHtml =
+            photos.length > 1
+              ? `<button type="button" class="arrow prev" onclick="stepPhoto('${c.id}', -1)">‹</button>
+                 <button type="button" class="arrow next" onclick="stepPhoto('${c.id}', 1)">›</button>`
+              : "";
+
+          return `
+            <div class="car-card">
+              <div>
+                <div class="photo-box">
+                  <img src="${photos[idx]}" onclick="openGallery('${c.id}')" alt="${c.title}" />
+                  <span class="photo-badge">${count}/${MAX_PHOTOS}</span>
+                  ${arrowsHtml}
+                </div>
+                ${thumbsHtml}
+                <div class="car-info">
+                  <div>
+                    <div class="car-head">
+                      <h2 class="car-name">${c.title}</h2>
+                      <div class="car-price">$${c.price.toLocaleString()}</div>
+                    </div>
+                    <div class="car-meta">${c.year}-жыл${c.specs ? " • " + c.specs : ""}</div>
+                    ${c.desc ? `<p class="car-desc">${c.desc}</p>` : ""}
+                  </div>
+                  <div>
+                    <button type="button" class="btn-zoom" onclick="openGallery('${c.id}')">Чоңойтуп көрүү</button>
+                    <a class="btn-wa" href="https://wa.me/${normalizedWa}?text=${waText}" target="_blank">WhatsApp жазуу</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    adminPass = loadAdminPass();
+    settings = loadSettings();
+    cars = loadCars();
+    syncSettingsUI();
+    renderPublic();
+  </script>
+</body>
+</html>
